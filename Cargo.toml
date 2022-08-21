@@ -9,9 +9,11 @@ edition = "2021"
 atty = "0.2"
 serde_json = "1.0"
 console = "0.15"
+text_io = "0.1.10"
 
 [dev-dependencies]
 lazy_static = "1.0"
 assert-json-diff = "2.0"
 ntest = "0.8"
 pretty_assertions = "1.2.1"
+
