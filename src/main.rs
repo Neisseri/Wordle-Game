@@ -1,5 +1,8 @@
 use console;
 use std::io::{self, Write};
+use crate::test_model::run_test_model;
+
+mod test_model;
 
 /// The main function for the Wordle game, implement your own logic here
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -11,7 +14,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             console::style("colorful characters").bold().blink().blue()
         );
     } else {
-        println!("I am not in a tty. Please print according to test requirements!");
+        //println!("I am not in a tty. Please print according to test requirements!");
+        run_test_model::test_run();
+        println!("RRRRR");
     }
 
     if is_tty {
