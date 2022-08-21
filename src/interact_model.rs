@@ -1,75 +1,27 @@
 use text_io::read;
 
-pub mod tool {
-    pub fn match_words(letter: char) -> usize {
-        match letter {
-            'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4,
-            'f' => 5, 'g' => 6, 'h' => 7, 'i' => 8, 'j' => 9,
-            'k' => 10, 'l' => 11, 'm' => 12, 'n' => 13, 'o' => 14,
-            'p' => 15, 'q' => 16, 'r' => 17, 's' => 18, 't' => 19,
-            'u' => 20, 'v' => 21, 'w' => 22, 'x' => 23, 'y' => 24,
-            'z' => 25,
-            _ => panic!("No this word!")
-        }
-    }
+pub mod run_interact_model {
+    use crate::test_model::tool::{self, match_number};
 
-    pub fn match_number(num: usize) -> char {
-        match num {
-            0 => 'A', 1 => 'B', 2 => 'C', 3 => 'D', 4 => 'E',
-            5 => 'F', 6 => 'G', 7 => 'H', 8 => 'I', 9 => 'J',
-            10 => 'K', 11 => 'L', 12 => 'M', 13 => 'N', 14 => 'O',
-            15 => 'P', 16 => 'Q', 17 => 'R', 18 => 'S', 19 => 'T',
-            20 => 'U', 21 => 'V', 22 => 'W', 23 => 'X', 24 => 'Y',
-            25 => 'Z', _ => {
-                panic!("Impossible!");
-                '!'
-            } 
-        }
-    }
 
-    #[derive(Clone)]
-    #[derive(PartialEq)]
-    pub enum Color {
-        Red,
-        Yellow,
-        Green,
-        Unknown
-    }
+    pub fn interact_run() -> () {
 
-    pub fn valid(guess: &String) -> bool {
+        use crate::test_model::tool::{ match_words, Color, valid };
+        use console;
 
-        use crate::builtin_words;
-
-        if guess.chars().count() == 5_usize {
-
-            for words in guess.chars() {
-                match words {
-                    'a' ..= 'z' => (),
-                    _ =>  return false
-                }
-            }
-
-            let find = builtin_words::ACCEPTABLE.iter()
-            .position(|&r| r == guess.as_str());
-            if find.is_none() == true {
-                return false
-            }
-
-        } else {
-            return false
-        }
-
-        true
-    }
-}
-
-pub mod run_test_model {
-
-    use super::tool::{match_words, Color, valid};
-
-    pub fn test_run() -> () {
         let mut guess_right: bool = true;
-        let answer: String = text_io::read!();
+        println!("Please type in the Answer!");
+        let mut answer: String = String::new();
+
+        std::io::stdin().read_line(&mut answer);
+        answer.pop();
+        while valid(&answer) == false {
+            println!("{}", console::style("The word is invalid!").bold().red());
+            answer.clear();
+            std::io::stdin().read_line(&mut answer);
+            answer.pop();
+        }
+
         let mut ans: Vec<char> = Vec::new();
         for words in answer.chars() {
             ans.push(words);
@@ -82,8 +34,17 @@ pub mod run_test_model {
 
         let mut guess: String = String::new();
         let mut keyboard: Vec<Color> = vec![Color::Unknown; 26];
+
+        println!("You have 6 chances to guess the word!");
+
+        let mut all_colors: Vec<Vec<Color>> = Vec::new();
+        let mut all_keybd: Vec<Vec<Color>> = Vec::new();
+        let mut all_guess: Vec<Vec<char>> = Vec::new();
         
         for number in 1 ..= 6 {
+
+            println!("This is round {}:", number);
+
             guess_right = true;
 
             guess.clear();
@@ -91,7 +52,7 @@ pub mod run_test_model {
             guess.pop();
             //println!("{}", guess);
             while valid(&guess) == false {
-                println!("INVALID");
+                println!("{}", console::style("The word is invalid!").bold().red());
                 guess.clear();
                 std::io::stdin().read_line(&mut guess);
                 guess.pop();
@@ -101,6 +62,8 @@ pub mod run_test_model {
             for words in guess.chars() {
                 gus.push(words);
             } // read the input words and convert into chars
+
+            all_guess.push(gus.clone());
 
             let mut colors: Vec<Color> = vec![Color::Unknown; 5];//the color of XXXXX
 
@@ -153,35 +116,42 @@ pub mod run_test_model {
 
             } //process the word
 
-            for i in 0 ..= 4 {
-                match colors[i] {
-                    Color::Green => print!("G"),
-                    Color::Red => print!("R"),
-                    Color::Yellow => print!("Y"),
-                    _ => ()
-                }
-            }
+            all_colors.push(colors.clone());
+            all_keybd.push(keyboard.clone());
 
-            print!(" ");
-            for i in 0 ..= 25 {
-                match keyboard[i] {
-                    Color::Green => print!("G"),
-                    Color::Red => print!("R"),
-                    Color::Yellow => print!("Y"),
+            for j in 0 ..= number - 1 {
+
+                for k in 0 ..= 4 {
+                    match all_colors[j][k] {
+                        Color::Green => print!("{}",console::style(all_guess[j][k].to_uppercase()).bold().green()),
+                        Color::Red => print!("{}", console::style(all_guess[j][k].to_uppercase()).bold().red()),
+                        Color::Yellow => print!("{}", console::style(all_guess[j][k].to_uppercase()).bold().yellow()),
+                        _ => ()
+                    }
+                }
+
+                print!(" ");
+                for k in 0 ..= 25 {
+                match all_keybd[j][k] {
+                    Color::Green => print!("{}",console::style(match_number(k)).bold().green()),
+                    Color::Red => print!("{}", console::style(match_number(k)).bold().red()),
+                    Color::Yellow => print!("{}", console::style(match_number(k)).bold().yellow()),
                     Color::Unknown => print!("X")
                 }
+
             }
             println!(""); // print the keyboard
 
+            }
+
             if guess_right == true {
-                println!("CORRECT {}", number);
+                println!("You used {} chances and get the answer!", number);
                 break;
             }
         }
 
         if guess_right == false {
-            println!("FAILED {}", answer.to_uppercase());
+            println!("You failed! The answer is {}!", answer.to_uppercase());
         }
-
     }
 }
