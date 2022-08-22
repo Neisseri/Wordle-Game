@@ -60,9 +60,53 @@ pub mod tool {
         true
     }
 
-    pub fn args_parse() -> (Option<String>, bool) {
+    pub struct difficult_record {
+        pub letter: i32,
+        pub color: Color
+    }
+
+    pub fn difficult_valid(
+        gus: &Vec<char>,
+        dif_rec: &Vec<difficult_record>
+    ) -> bool {
+        let mut is_valid: bool = true;
+
+        let mut is_used: Vec<bool> = vec![false; 5];
+
+        for i in 0 ..= 4 {
+
+            if dif_rec[i].color == Color::Green {
+                if dif_rec[i].letter != match_words(gus[i]) as i32 {
+                    is_valid = false;
+                    break;
+                }
+                is_used[i] = true;
+            }
+
+            if dif_rec[i].color == Color::Yellow {
+                let mut if_find: bool = false;
+                for j in 0 ..= 4 {
+                    if is_used[j] == false 
+                    && dif_rec[i].letter == match_words(gus[j]) as i32 {
+                        is_used[j] = true;
+                        if_find = true;
+                    } 
+                }
+                if if_find == false {
+                    is_valid = false;
+                    break;
+                }
+            }
+            
+        }
+
+        is_valid
+    }
+
+    pub fn args_parse() -> (Option<String>, bool, bool) {
         let mut word: Option<String> = None;
         let mut random: bool = false;
+        let mut difficult: bool = false;
 
         let mut get_word: bool = false;
 
@@ -77,10 +121,11 @@ pub mod tool {
             match arg.as_str() {
                 "-w" | "--word" =>  get_word = true,
                 "-r" | "--random" => random = true,
+                "-D" | "--difficult" => difficult = true,
                 _ => ()
             }
         }
-        (word, random)
+        (word, random, difficult)
     }
 
 

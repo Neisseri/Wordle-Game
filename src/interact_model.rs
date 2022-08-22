@@ -1,7 +1,9 @@
 use text_io::read;
 
 pub mod run_interact_model {
-    use crate::{my_tool::tool::{self, match_number}, builtin_words::FINAL};
+    use core::num;
+
+    use crate::{my_tool::{tool::{self, match_number, difficult_record}, self}, builtin_words::FINAL};
 
     pub fn interact_run() -> () {
 
@@ -12,7 +14,8 @@ pub mod run_interact_model {
 
         let mut is_word: Option<String> = None;
         let mut is_random: bool = false;
-        (is_word, is_random) = args_parse();
+        let mut is_difficult: bool = false;
+        (is_word, is_random, is_difficult) = args_parse();
 
         let mut guess_right: bool = true;
         let mut answer: String = String::new();
@@ -61,6 +64,8 @@ pub mod run_interact_model {
         let mut all_colors: Vec<Vec<Color>> = Vec::new();
         let mut all_keybd: Vec<Vec<Color>> = Vec::new();
         let mut all_guess: Vec<Vec<char>> = Vec::new();
+
+        let mut dif_rec: Vec<difficult_record> = Vec::new();
         
         for number in 1 ..= 6 {
 
@@ -71,7 +76,7 @@ pub mod run_interact_model {
             guess.clear();
             std::io::stdin().read_line(&mut guess);
             guess.pop();
-            //println!("{}", guess);
+            
             while valid(&guess) == false {
                 println!("{}", console::style("The word is invalid!").bold().red());
                 guess.clear();
@@ -84,12 +89,41 @@ pub mod run_interact_model {
                 gus.push(words);
             } // read the input words and convert into chars
 
+            if is_difficult == true && number > 1 {
+
+                while tool::difficult_valid(&gus, &dif_rec) == false {
+
+                    println!("{}",
+                        console::style("The word is invalid in difficlut model!")
+                        .bold().red()
+                    );
+                    guess.clear();
+                    std::io::stdin().read_line(&mut guess);
+                    guess.pop();
+
+                    while valid(&guess) == false {
+                        println!("{}", console::style("The word is invalid!").bold().red());
+                        guess.clear();
+                        std::io::stdin().read_line(&mut guess);
+                        guess.pop();
+                    }
+
+                    gus.clear();
+                    for words in guess.chars() {
+                        gus.push(words);
+                    } // read the input words and convert into chars
+                }
+
+            }
+
             all_guess.push(gus.clone());
 
             let mut colors: Vec<Color> = vec![Color::Unknown; 5];//the color of XXXXX
 
             let mut cnt_gus: Vec<i32> = vec![0; 26];
             // the number of letters in the guessed word
+
+            dif_rec.clear();
 
             for i in 0 ..= 4 {
                 let letter_num = match_words(gus[i]);
@@ -109,6 +143,11 @@ pub mod run_interact_model {
                         colors[i] = Color::Red;
                     }
                 } // give the color of XXXXX
+
+                dif_rec.push(difficult_record{
+                    letter: match_words(gus[i]) as i32,
+                    color: colors[i].clone()
+                });
 
                 if colors[i] == Color::Red {
                     if keyboard[match_words(gus[i])] == Color::Unknown {
@@ -157,7 +196,7 @@ pub mod run_interact_model {
                     Color::Green => print!("{}",console::style(match_number(k)).bold().green()),
                     Color::Red => print!("{}", console::style(match_number(k)).bold().red()),
                     Color::Yellow => print!("{}", console::style(match_number(k)).bold().yellow()),
-                    Color::Unknown => print!("X")
+                    Color::Unknown => print!("{}", match_number(k))
                 }
 
             }
