@@ -90,6 +90,7 @@ pub mod tool {
                     && dif_rec[i].letter == match_words(gus[j]) as i32 {
                         is_used[j] = true;
                         if_find = true;
+                        break;
                     } 
                 }
                 if if_find == false {
@@ -103,10 +104,11 @@ pub mod tool {
         is_valid
     }
 
-    pub fn args_parse() -> (Option<String>, bool, bool) {
+    pub fn args_parse() -> (Option<String>, bool, bool, bool) {
         let mut word: Option<String> = None;
         let mut random: bool = false;
         let mut difficult: bool = false;
+        let mut stats: bool = false;
 
         let mut get_word: bool = false;
 
@@ -122,10 +124,11 @@ pub mod tool {
                 "-w" | "--word" =>  get_word = true,
                 "-r" | "--random" => random = true,
                 "-D" | "--difficult" => difficult = true,
+                "-t" | "--stats" => stats = true,
                 _ => ()
             }
         }
-        (word, random, difficult)
+        (word, random, difficult, stats)
     }
 
 

@@ -5,17 +5,19 @@ use crate::my_tool::tool;
 pub mod run_test_model {
 
     use super::tool::{match_words, Color, valid, args_parse};
-    use crate::builtin_words;
+    use crate::{builtin_words, my_tool::tool::match_number};
     use rand::Rng;
+    use crate::overall_situation::overall_variables;
 
-    pub fn test_run() -> () {
+    pub fn test_run() -> (bool, bool, bool) {
 
         use crate::my_tool::tool::{ difficult_record, difficult_valid };
 
         let mut is_word: Option<String> = None;
         let mut is_random: bool = false;
         let mut is_difficult: bool = false;
-        (is_word, is_random, is_difficult) = args_parse();
+        let mut is_stats: bool = false;
+        (is_word, is_random, is_difficult, is_stats) = args_parse();
 
         let mut guess_right: bool = true;
         let mut answer: String = String::new();
@@ -25,11 +27,19 @@ pub mod run_test_model {
 
             let mut rng = rand::thread_rng();
             let mut index: usize = rng.gen_range(0 ..= 2314);
+            unsafe {
+                let mut if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+                while if_repeat.is_some() == true {
+                    index = rng.gen_range(0 ..= 2314);
+                    if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+                }
+                overall_variables::word_history.push(index);
+            }
             answer = builtin_words::FINAL[index].to_string();
 
         } else if is_word.is_some() == true { // read the answer from args
             
-            answer = is_word.unwrap().to_lowercase();
+            answer = is_word.clone().unwrap().to_lowercase();
 
         } else { // the basic model
 
@@ -51,6 +61,8 @@ pub mod run_test_model {
         let mut keyboard: Vec<Color> = vec![Color::Unknown; 26];
         
         for number in 1 ..= 6 {
+
+            //println!("{}", number);
             guess_right = true;
 
             guess.clear();
@@ -93,6 +105,8 @@ pub mod run_test_model {
 
             }
 
+            overall_variables::record_use_times(guess.clone());
+
             let mut colors: Vec<Color> = vec![Color::Unknown; 5];//the color of XXXXX
 
             let mut cnt_gus: Vec<i32> = vec![0; 26];
@@ -100,14 +114,21 @@ pub mod run_test_model {
 
             dif_rec.clear();
 
+            //println!("case 1");
             for i in 0 ..= 4 {
-                let letter_num = match_words(gus[i]);
-                cnt_gus[letter_num] += 1;
-                //count the number of used letters
+                if gus[i] == ans[i] {
+                    cnt_gus[match_words(gus[i])] += 1;
+                }
+            }
 
+            for i in 0 ..= 4 {
+               
                 if gus[i] == ans[i] {
                     colors[i] = Color::Green;
                 } else {
+                    let letter_num = match_words(gus[i]);
+                    cnt_gus[letter_num] += 1;
+                    //count the number of used letters
 
                     guess_right = false;
 
@@ -150,6 +171,7 @@ pub mod run_test_model {
                 }
 
             } //process the word
+            //println!("case 2");
 
             for i in 0 ..= 4 {
                 match colors[i] {
@@ -173,13 +195,27 @@ pub mod run_test_model {
 
             if guess_right == true {
                 println!("CORRECT {}", number);
+                unsafe {
+                    overall_variables::try_times.push(number as i32);
+                }
                 break;
             }
+            //println!("case 3");
         }
 
         if guess_right == false {
+            unsafe { overall_variables::fail_num += 1; }
             println!("FAILED {}", answer.to_uppercase());
+        } else {
+            unsafe { overall_variables::success_num += 1; }
         }
+
+        let mut word: bool = false;
+        if is_word.is_some() == true {
+            word = true;
+        }
+        //println!("case 4");
+        (word, is_random, is_stats)
 
     }
 }

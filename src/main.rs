@@ -1,12 +1,16 @@
+use circle_argument::game_circle::test_model_circle;
 use console;
 use std::io::{self, Write};
 use crate::test_model::run_test_model;
 use crate::interact_model::run_interact_model;
+use crate::circle_argument::game_circle::{ interact_model_circle };
 
 mod test_model;
 mod builtin_words;
 mod interact_model;
 mod my_tool;
+mod circle_argument;
+mod overall_situation;
 
 /// The main function for the Wordle game, implement your own logic here
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -23,6 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }*/
 
     if is_tty {
+        
         print!("{}", console::style("Your name: ").bold().red());
         io::stdout().flush().unwrap();
 
@@ -38,10 +43,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("");
         // TODO: parse the arguments in `args`
 
-        run_interact_model::interact_run();
+        interact_model_circle();
 
     } else {
-        run_test_model::test_run();
+        test_model_circle();
     }
 
     Ok(())

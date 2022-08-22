@@ -5,17 +5,19 @@ pub mod run_interact_model {
 
     use crate::{my_tool::{tool::{self, match_number, difficult_record}, self}, builtin_words::FINAL};
 
-    pub fn interact_run() -> () {
+    pub fn interact_run() -> (bool, bool, bool) {
 
         use crate::my_tool::tool::{ match_words, Color, valid, args_parse };
         use console;
         use rand::Rng;
         use crate::builtin_words;
+        use crate::overall_situation::overall_variables;
 
         let mut is_word: Option<String> = None;
         let mut is_random: bool = false;
         let mut is_difficult: bool = false;
-        (is_word, is_random, is_difficult) = args_parse();
+        let mut is_stats: bool = false;
+        (is_word, is_random, is_difficult, is_stats) = args_parse();
 
         let mut guess_right: bool = true;
         let mut answer: String = String::new();
@@ -24,11 +26,19 @@ pub mod run_interact_model {
 
             let mut rng = rand::thread_rng();
             let mut index: usize = rng.gen_range(0 ..= 2314);
+            unsafe {
+                let mut if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+                while if_repeat.is_some() == true {
+                    index = rng.gen_range(0 ..= 2314);
+                    if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+                }
+                overall_variables::word_history.push(index);
+            }
             answer = FINAL[index].to_string();
 
         } else if is_word.is_some() == true { // read the answer from args
 
-            answer = is_word.unwrap().to_lowercase();
+            answer = is_word.clone().unwrap().to_lowercase();
 
         } else { // the basic model
 
@@ -118,6 +128,8 @@ pub mod run_interact_model {
 
             all_guess.push(gus.clone());
 
+            overall_variables::record_use_times(guess.clone());
+
             let mut colors: Vec<Color> = vec![Color::Unknown; 5];//the color of XXXXX
 
             let mut cnt_gus: Vec<i32> = vec![0; 26];
@@ -126,13 +138,20 @@ pub mod run_interact_model {
             dif_rec.clear();
 
             for i in 0 ..= 4 {
-                let letter_num = match_words(gus[i]);
-                cnt_gus[letter_num] += 1;
-                //count the number of used letters
+                if gus[i] == ans[i] {
+                    cnt_gus[match_words(gus[i])] += 1;
+                }
+            }
 
+            for i in 0 ..= 4 {
+                
                 if gus[i] == ans[i] {
                     colors[i] = Color::Green;
                 } else {
+
+                    let letter_num = match_words(gus[i]);
+                    cnt_gus[letter_num] += 1;
+                    //count the number of used letters
 
                     guess_right = false;
 
@@ -192,26 +211,40 @@ pub mod run_interact_model {
 
                 print!(" ");
                 for k in 0 ..= 25 {
-                match all_keybd[j][k] {
-                    Color::Green => print!("{}",console::style(match_number(k)).bold().green()),
-                    Color::Red => print!("{}", console::style(match_number(k)).bold().red()),
-                    Color::Yellow => print!("{}", console::style(match_number(k)).bold().yellow()),
-                    Color::Unknown => print!("{}", match_number(k))
-                }
+                    match all_keybd[j][k] {
+                        Color::Green => print!("{}",console::style(match_number(k)).bold().green()),
+                        Color::Red => print!("{}", console::style(match_number(k)).bold().red()),
+                        Color::Yellow => print!("{}", console::style(match_number(k)).bold().yellow()),
+                        Color::Unknown => print!("{}", match_number(k))
+                    }
 
-            }
-            println!(""); // print the keyboard
+                }
+                println!(""); // print the keyboard
 
             }
 
             if guess_right == true {
                 println!("You used {} chances and get the answer!", number);
+                unsafe {
+                    overall_variables::try_times.push(number as i32);
+                }
                 break;
             }
         }
 
         if guess_right == false {
+            unsafe { overall_variables::fail_num += 1; }
             println!("You failed! The answer is {}!", answer.to_uppercase());
+        } else {
+            unsafe { overall_variables::success_num += 1; }
         }
+
+        let mut word: bool = false;
+        if is_word.is_some() == true {
+            word = true;
+        }
+        (word, is_random, is_stats)
+
+        
     }
 }
