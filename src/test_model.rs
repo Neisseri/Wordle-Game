@@ -1,75 +1,38 @@
 use text_io::read;
 
-pub mod tool {
-    pub fn match_words(letter: char) -> usize {
-        match letter {
-            'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4,
-            'f' => 5, 'g' => 6, 'h' => 7, 'i' => 8, 'j' => 9,
-            'k' => 10, 'l' => 11, 'm' => 12, 'n' => 13, 'o' => 14,
-            'p' => 15, 'q' => 16, 'r' => 17, 's' => 18, 't' => 19,
-            'u' => 20, 'v' => 21, 'w' => 22, 'x' => 23, 'y' => 24,
-            'z' => 25,
-            _ => panic!("No this word!")
-        }
-    }
-
-    pub fn match_number(num: usize) -> char {
-        match num {
-            0 => 'A', 1 => 'B', 2 => 'C', 3 => 'D', 4 => 'E',
-            5 => 'F', 6 => 'G', 7 => 'H', 8 => 'I', 9 => 'J',
-            10 => 'K', 11 => 'L', 12 => 'M', 13 => 'N', 14 => 'O',
-            15 => 'P', 16 => 'Q', 17 => 'R', 18 => 'S', 19 => 'T',
-            20 => 'U', 21 => 'V', 22 => 'W', 23 => 'X', 24 => 'Y',
-            25 => 'Z', _ => {
-                panic!("Impossible!");
-                '!'
-            } 
-        }
-    }
-
-    #[derive(Clone)]
-    #[derive(PartialEq)]
-    pub enum Color {
-        Red,
-        Yellow,
-        Green,
-        Unknown
-    }
-
-    pub fn valid(guess: &String) -> bool {
-
-        use crate::builtin_words;
-
-        if guess.chars().count() == 5_usize {
-
-            for words in guess.chars() {
-                match words {
-                    'a' ..= 'z' => (),
-                    _ =>  return false
-                }
-            }
-
-            let find = builtin_words::ACCEPTABLE.iter()
-            .position(|&r| r == guess.as_str());
-            if find.is_none() == true {
-                return false
-            }
-
-        } else {
-            return false
-        }
-
-        true
-    }
-}
+use crate::my_tool::tool;
 
 pub mod run_test_model {
 
-    use super::tool::{match_words, Color, valid};
+    use super::tool::{match_words, Color, valid, args_parse};
+    use crate::builtin_words;
+    use rand::Rng;
 
     pub fn test_run() -> () {
+
+        let mut is_word: Option<String> = None;
+        let mut is_random: bool = false;
+        (is_word, is_random) = args_parse();
+
         let mut guess_right: bool = true;
-        let answer: String = text_io::read!();
+        let mut answer: String = String::new();
+
+        if is_random == true { // the random model: read the answer from FINAL
+
+            let mut rng = rand::thread_rng();
+            let mut index: usize = rng.gen_range(0 ..= 2314);
+            answer = builtin_words::FINAL[index].to_string();
+
+        } else if is_word.is_some() == true { // read the answer from args
+            
+            answer = is_word.unwrap().to_lowercase();
+
+        } else { // the basic model
+
+            answer = text_io::read!();
+
+        } // read answer from stdin
+        
         let mut ans: Vec<char> = Vec::new();
         for words in answer.chars() {
             ans.push(words);

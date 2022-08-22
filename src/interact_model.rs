@@ -1,25 +1,46 @@
 use text_io::read;
 
 pub mod run_interact_model {
-    use crate::test_model::tool::{self, match_number};
-
+    use crate::{my_tool::tool::{self, match_number}, builtin_words::FINAL};
 
     pub fn interact_run() -> () {
 
-        use crate::test_model::tool::{ match_words, Color, valid };
+        use crate::my_tool::tool::{ match_words, Color, valid, args_parse };
         use console;
+        use rand::Rng;
+        use crate::builtin_words;
+
+        let mut is_word: Option<String> = None;
+        let mut is_random: bool = false;
+        (is_word, is_random) = args_parse();
 
         let mut guess_right: bool = true;
-        println!("Please type in the Answer!");
         let mut answer: String = String::new();
 
-        std::io::stdin().read_line(&mut answer);
-        answer.pop();
-        while valid(&answer) == false {
-            println!("{}", console::style("The word is invalid!").bold().red());
-            answer.clear();
+        if is_random == true { // the random model: read the answer from FINAL
+
+            let mut rng = rand::thread_rng();
+            let mut index: usize = rng.gen_range(0 ..= 2314);
+            answer = FINAL[index].to_string();
+
+        } else if is_word.is_some() == true { // read the answer from args
+
+            answer = is_word.unwrap().to_lowercase();
+
+        } else { // the basic model
+
+            // read in answer from stdin
+            println!("Please type in the Answer!");
+            
             std::io::stdin().read_line(&mut answer);
             answer.pop();
+            while valid(&answer) == false {
+                println!("{}", console::style("The word is invalid!").bold().red());
+                answer.clear();
+                std::io::stdin().read_line(&mut answer);
+                answer.pop();
+            }// read in answer from stdin
+
         }
 
         let mut ans: Vec<char> = Vec::new();

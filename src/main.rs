@@ -6,6 +6,7 @@ use crate::interact_model::run_interact_model;
 mod test_model;
 mod builtin_words;
 mod interact_model;
+mod my_tool;
 
 /// The main function for the Wordle game, implement your own logic here
 fn main() -> Result<(), Box<dyn std::error::Error>> {
