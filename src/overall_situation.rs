@@ -7,6 +7,10 @@ pub mod overall_variables {
     pub static mut word_history: Vec<usize> = Vec::new();
     pub static mut try_times: Vec<i32> = Vec::new();
     pub static mut use_times: Vec<(usize, i32)> = Vec::new(); 
+    pub static mut is_day: Option<i32> = None;
+    pub static mut is_seed: Option<u64> = None;
+    pub static mut round: i32 = 0; // the round is --seed model
+    pub static mut if_conflict: bool = false;
 
     pub fn try_times_on_average() -> f64 {
         let mut a: f64 = 0.0;

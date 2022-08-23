@@ -1,4 +1,6 @@
 pub mod tool {
+    use crate::overall_situation::overall_variables::{is_day, is_seed, if_conflict};
+
     pub fn match_words(letter: char) -> usize {
         match letter {
             'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4,
@@ -111,6 +113,8 @@ pub mod tool {
         let mut stats: bool = false;
 
         let mut get_word: bool = false;
+        let mut get_day: bool = false;
+        let mut get_seed: bool = false;
 
         for arg in std::env::args() {
 
@@ -120,15 +124,95 @@ pub mod tool {
                 continue;
             }
 
+            if get_day == true {
+                let days: Option<i32> = if_number(arg.clone());
+                if days.is_some() == true {
+                    unsafe { is_day = days; }
+                }
+                get_day = false;
+                continue;
+            }
+
+            if get_seed == true {
+                let seed: Option<u64> = if_number_u64(arg.clone());
+                if seed.is_some() == true {
+                    unsafe { is_seed = seed; }
+                }
+                get_seed = false;
+                continue;
+            }
+
             match arg.as_str() {
                 "-w" | "--word" =>  get_word = true,
                 "-r" | "--random" => random = true,
                 "-D" | "--difficult" => difficult = true,
                 "-t" | "--stats" => stats = true,
+                "-d" | "--day" => unsafe { is_day = Some(1); get_day = true; },
+                "-s" | "--seed" => unsafe { is_seed = Some(100); get_seed = true; }
                 _ => ()
             }
         }
+
+        if random == true { // random model
+            if word.is_some() == true {
+                unsafe { if_conflict = true; }
+            }
+        } else { // set-answer model
+            unsafe {
+                if is_day.is_some() == true {
+                    if_conflict = true;
+                }
+                if is_seed.is_some() == true { 
+                    if_conflict = true;
+                }
+            }
+        }
+
         (word, random, difficult, stats)
+    }
+
+    pub fn if_number(s: String) -> Option<i32> {
+        let mut ans: i32 = 0;
+        let mut is_num: bool = true;
+
+        for c in s.chars() {
+                let this_num: i32 = 
+                match c {
+                    '0' => 0, '1' => 1, '2' => 2, '3' => 3, '4' => 4,
+                    '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9,
+                    _ => -1
+                };
+                if this_num == -1 { is_num = false; break; }
+                ans = ans * 10 + this_num;
+            }
+        
+        if is_num == true {
+            Some(ans)
+        } else {
+            None
+        }
+    }
+
+    pub fn if_number_u64(s: String) -> Option<u64> {
+        let mut ans: u64 = 0;
+        let mut is_num: bool = true;
+
+        for c in s.chars() {
+                let this_num: u64 = 
+                match c {
+                    '0' => 0, '1' => 1, '2' => 2, '3' => 3, '4' => 4,
+                    '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9,
+                    _ => 100
+                };
+                if this_num == 100 { is_num = false; break; }
+                ans = ans * 10 + this_num;
+            }
+        
+        if is_num == true {
+            Some(ans)
+        } else {
+            None
+        }
     }
 
 

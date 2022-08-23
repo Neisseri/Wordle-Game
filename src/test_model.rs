@@ -5,8 +5,10 @@ use crate::my_tool::tool;
 pub mod run_test_model {
 
     use super::tool::{match_words, Color, valid, args_parse};
-    use crate::{builtin_words, my_tool::tool::match_number};
-    use rand::Rng;
+    use crate::{builtin_words, my_tool::tool::match_number, overall_situation::overall_variables::{is_day, is_seed, round, if_conflict}};
+    use rand::{Rng, SeedableRng};
+    use rand::rngs::StdRng;
+    use rand::seq::SliceRandom;
     use crate::overall_situation::overall_variables;
 
     pub fn test_run() -> (bool, bool, bool) {
@@ -19,23 +21,80 @@ pub mod run_test_model {
         let mut is_stats: bool = false;
         (is_word, is_random, is_difficult, is_stats) = args_parse();
 
+        unsafe {
+            if if_conflict == true {
+                panic!("Conflicted Arguments!");
+            }
+        } // -d -s
+
         let mut guess_right: bool = true;
         let mut answer: String = String::new();
         let mut dif_rec: Vec<difficult_record> = Vec::new();
 
         if is_random == true { // the random model: read the answer from FINAL
 
-            let mut rng = rand::thread_rng();
-            let mut index: usize = rng.gen_range(0 ..= 2314);
-            unsafe {
-                let mut if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
-                while if_repeat.is_some() == true {
-                    index = rng.gen_range(0 ..= 2314);
-                    if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+            let mut seed: Option<u64>;
+            unsafe { seed = is_seed; } // --seed
+
+            // --seed
+            if seed.is_none() == true {
+
+                let mut rng = rand::thread_rng();
+                let mut index: usize = rng.gen_range(0 ..= 2314);
+                unsafe {
+                    let mut if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+                    while if_repeat.is_some() == true {
+                        index = rng.gen_range(0 ..= 2314);
+                        if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+                    }
+                    overall_variables::word_history.push(index);
                 }
-                overall_variables::word_history.push(index);
-            }
-            answer = builtin_words::FINAL[index].to_string();
+                answer = builtin_words::FINAL[index].to_string();
+
+                // --day
+                unsafe {
+                    if is_day.is_some() == true {
+                        let day_num: i32 = is_day.unwrap() - 1;
+                        if day_num > 0 {
+                            for _ in 1 ..= day_num {
+                                let mut rng = rand::thread_rng();
+                                let mut index: usize = rng.gen_range(0 ..= 2314);
+                                let mut if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+                                while if_repeat.is_some() == true {
+                                    index = rng.gen_range(0 ..= 2314);
+                                    if_repeat = overall_variables::word_history.iter().position(|r| r == &index);
+                                }
+                                overall_variables::word_history.push(index);
+                                answer = builtin_words::FINAL[index].to_string();
+                            }
+                        }
+                        is_day = None;
+                    }
+                } // --day
+
+            } else { // have seed
+                
+                let mut rand_seed: u64 = seed.unwrap();
+                let mut rng = rand::rngs::StdRng::seed_from_u64(rand_seed);
+                let mut y = [0_usize; 2315];
+                for i in 0_usize ..= 2314_usize {
+                    y[i] = i;
+                }
+                y.shuffle(& mut rng);
+                let mut index = 0;
+                unsafe {
+                    round += 1;
+                    if is_day.is_none() == true {
+                        index = round - 1;
+                    } else {
+                        let mut skip = is_day.unwrap();
+                        index = round - 1 + skip - 1;
+                    }
+                }
+                answer = builtin_words::FINAL[y[index as usize]].to_string();
+                //println!("The Answer is: {} {}", index, answer);
+
+            } // --seed
 
         } else if is_word.is_some() == true { // read the answer from args
             
