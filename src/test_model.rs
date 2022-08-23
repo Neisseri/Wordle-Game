@@ -1,11 +1,10 @@
 use text_io::read;
-
 use crate::my_tool::tool;
 
 pub mod run_test_model {
 
     use super::tool::{match_words, Color, valid, args_parse};
-    use crate::{builtin_words, my_tool::tool::match_number, overall_situation::overall_variables::{is_day, is_seed, round, if_conflict}};
+    use crate::{builtin_words, my_tool::tool::match_number, overall_situation::overall_variables::{is_day, is_seed, round, if_conflict, need_parse, record_random, record_word, record_dif, record_stats}};
     use rand::{Rng, SeedableRng};
     use rand::rngs::StdRng;
     use rand::seq::SliceRandom;
@@ -19,7 +18,21 @@ pub mod run_test_model {
         let mut is_random: bool = false;
         let mut is_difficult: bool = false;
         let mut is_stats: bool = false;
-        (is_word, is_random, is_difficult, is_stats) = args_parse();
+        unsafe {
+            if need_parse == true {
+                (is_word, is_random, is_difficult, is_stats) = args_parse();
+                record_word = is_word.clone();
+                record_random = is_random;
+                record_dif = is_difficult;
+                record_stats = is_stats;
+                need_parse = false;
+            } else {
+                is_word = record_word.clone();
+                is_random = record_random;
+                is_difficult = record_dif;
+                is_stats = record_stats;
+            }
+        }
 
         unsafe {
             if if_conflict == true {

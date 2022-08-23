@@ -1,6 +1,8 @@
 pub mod overall_variables {
 
     use crate::builtin_words;
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
 
     pub static mut success_num: i32 = 0;
     pub static mut fail_num: i32 = 0;
@@ -11,6 +13,16 @@ pub mod overall_variables {
     pub static mut is_seed: Option<u64> = None;
     pub static mut round: i32 = 0; // the round is --seed model
     pub static mut if_conflict: bool = false;
+    pub static mut if_final_set: Option<String> = None;
+    pub static mut if_acceptable_set: Option<String> = None;
+    pub static mut acceptable_set: Vec<String> = Vec::new();
+    pub static mut final_set: Vec<String> = Vec::new();
+    
+    pub static mut need_parse: bool = true; // only the first round need to parse
+    pub static mut record_word: Option<String> = None;
+    pub static mut record_random: bool = false;
+    pub static mut record_dif: bool = false;
+    pub static mut record_stats: bool = false;
 
     pub fn try_times_on_average() -> f64 {
         let mut a: f64 = 0.0;
@@ -149,4 +161,41 @@ pub mod overall_variables {
             println!("");
         }
     }
+
+    pub fn final_len() -> usize {
+        unsafe {
+            if if_final_set.is_none() == true {
+                2315
+            } else {
+                1 // NOT COMPLETED!!!!!!!!!!!!!!!!!!!!!!!!!
+            }
+        }
+    }
+
+    pub fn read_acceptable_set(address: String) {
+
+        let file = File::open(address).unwrap();
+        let reader = BufReader::new(file);
+
+        for (index, line) in reader.lines().enumerate() {
+            let line = line.unwrap(); // Ignore errors.
+            //println!("Acceptable: {}", line);
+            unsafe { acceptable_set.push(line); }
+        }
+
+    }
+
+    pub fn read_final_set(address: String) {
+
+        let file = File::open(address).unwrap();
+        let reader = BufReader::new(file);
+
+        for (index, line) in reader.lines().enumerate() {
+            let line = line.unwrap(); // Ignore errors.
+            //println!("Final: {}", line);
+            unsafe { final_set.push(line); }
+        }
+
+    }
+
 }

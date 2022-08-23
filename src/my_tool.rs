@@ -1,5 +1,5 @@
 pub mod tool {
-    use crate::overall_situation::overall_variables::{is_day, is_seed, if_conflict};
+    use crate::overall_situation::overall_variables::{is_day, is_seed, if_conflict, if_final_set, if_acceptable_set, self, final_set, acceptable_set};
 
     pub fn match_words(letter: char) -> usize {
         match letter {
@@ -115,6 +115,8 @@ pub mod tool {
         let mut get_word: bool = false;
         let mut get_day: bool = false;
         let mut get_seed: bool = false;
+        let mut get_final: bool = false;
+        let mut get_acceptable: bool = false;
 
         for arg in std::env::args() {
 
@@ -142,13 +144,33 @@ pub mod tool {
                 continue;
             }
 
+            if get_final == true {
+                unsafe {
+                    if_final_set = Some(arg.clone());
+                    overall_variables::read_final_set(arg.clone());
+                }
+                get_final = false;
+                continue;
+            }
+
+            if get_acceptable == true {
+                unsafe { 
+                    if_acceptable_set = Some(arg.clone()); 
+                    overall_variables::read_acceptable_set(arg.clone());
+                }
+                get_acceptable = false;
+                continue;
+            }
+
             match arg.as_str() {
                 "-w" | "--word" =>  get_word = true,
                 "-r" | "--random" => random = true,
                 "-D" | "--difficult" => difficult = true,
                 "-t" | "--stats" => stats = true,
                 "-d" | "--day" => unsafe { is_day = Some(1); get_day = true; },
-                "-s" | "--seed" => unsafe { is_seed = Some(100); get_seed = true; }
+                "-s" | "--seed" => unsafe { is_seed = Some(100); get_seed = true; },
+                "-f" | "--final-set" => get_final = true,
+                "-a" | "--acceptable-set" => get_acceptable = true,
                 _ => ()
             }
         }
@@ -166,6 +188,15 @@ pub mod tool {
                     if_conflict = true;
                 }
             }
+        }
+
+        unsafe {
+            if if_acceptable_set.is_some() == true &&
+                if_final_set.is_some() == true {
+                    if word_set_check() == false {
+                        if_conflict = true;
+                    }
+                }
         }
 
         (word, random, difficult, stats)
@@ -215,5 +246,26 @@ pub mod tool {
         }
     }
 
+    pub fn word_set_check() -> bool {
+        let mut b: bool = true;
+
+        unsafe {
+            for i in 0 ..= final_set.len() - 1 {
+                let mut find: bool = false;
+                for j in 0 ..= acceptable_set.len() - 1 {
+                    if acceptable_set[j] == final_set[i] {
+                        find = true;
+                        break;
+                    }
+                }
+                if find == false {
+                    b = false;
+                    break;
+                }
+            }
+        }
+
+        b
+    }
 
 }
