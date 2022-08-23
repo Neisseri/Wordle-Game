@@ -1,5 +1,5 @@
 pub mod tool {
-    use crate::overall_situation::overall_variables::{is_day, is_seed, if_conflict, if_final_set, if_acceptable_set, self, final_set, acceptable_set};
+    use crate::overall_situation::overall_variables::{is_day, is_seed, if_conflict, if_final_set, if_acceptable_set, self, final_set, acceptable_set, if_state, json_address};
 
     pub fn match_words(letter: char) -> usize {
         match letter {
@@ -117,6 +117,7 @@ pub mod tool {
         let mut get_seed: bool = false;
         let mut get_final: bool = false;
         let mut get_acceptable: bool = false;
+        let mut get_state: bool = false;
 
         for arg in std::env::args() {
 
@@ -162,6 +163,14 @@ pub mod tool {
                 continue;
             }
 
+            if get_state == true {
+                unsafe {
+                    json_address = arg.clone();
+                }
+                get_state = false;
+                continue;
+            }
+
             match arg.as_str() {
                 "-w" | "--word" =>  get_word = true,
                 "-r" | "--random" => random = true,
@@ -171,6 +180,7 @@ pub mod tool {
                 "-s" | "--seed" => unsafe { is_seed = Some(100); get_seed = true; },
                 "-f" | "--final-set" => get_final = true,
                 "-a" | "--acceptable-set" => get_acceptable = true,
+                "-S" | "--state" => unsafe { if_state = true; get_state = true },
                 _ => ()
             }
         }

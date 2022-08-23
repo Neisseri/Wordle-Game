@@ -1,6 +1,6 @@
 pub mod game_circle {
 
-    use crate::{interact_model::run_interact_model, test_model::run_test_model};
+    use crate::{interact_model::run_interact_model, test_model::run_test_model, overall_situation::overall_variables::if_state, parse_json};
     use text_io::read;
     use crate::overall_situation::overall_variables;
 
@@ -73,12 +73,20 @@ pub mod game_circle {
         let mut stats: bool = false;
         let mut suc_num: i32 = 0;
         let mut fail_num: i32 = 0;
+
         (word, random, stats) = run_test_model::test_run();
+
+        // json
+        unsafe {
+            if if_state == true {
+                parse_json::process_json::before_load_json(overall_variables::json_address.clone());
+            }
+        }
 
         if stats == true {
             unsafe {
                 suc_num = overall_variables::success_num;
-                fail_num = overall_variables::fail_num; 
+                fail_num = overall_variables::fail_num;
             }
             println!("{} {} {:.2}", suc_num, fail_num,
                 overall_variables::try_times_on_average());
@@ -103,6 +111,12 @@ pub mod game_circle {
                         overall_variables::try_times_on_average());
                     overall_variables::print_frequent_test();
                 }
+            }
+        }
+
+        unsafe {
+            if if_state == true {
+                parse_json::process_json::load_json(overall_variables::json_address.clone());
             }
         }
 

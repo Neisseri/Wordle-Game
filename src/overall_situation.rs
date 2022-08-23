@@ -1,11 +1,13 @@
 pub mod overall_variables {
 
-    use crate::builtin_words;
+    use crate::{builtin_words, parse_json};
     use std::fs::File;
     use std::io::{BufRead, BufReader};
+    use crate::parse_json::process_json::State;
 
-    pub static mut success_num: i32 = 0;
-    pub static mut fail_num: i32 = 0;
+    pub static mut success_num: i32 = 0; // the win times
+    pub static mut fail_num: i32 = 0; // the fail times
+    pub static mut TotalNum: i32 = 0;
     pub static mut word_history: Vec<usize> = Vec::new();
     pub static mut try_times: Vec<i32> = Vec::new();
     pub static mut use_times: Vec<(usize, i32)> = Vec::new(); 
@@ -23,6 +25,9 @@ pub mod overall_variables {
     pub static mut record_random: bool = false;
     pub static mut record_dif: bool = false;
     pub static mut record_stats: bool = false;
+    pub static mut if_state: bool = false;
+    pub static mut json_address: String = String::new();
+    pub static mut GamesRecord: Vec<parse_json::process_json::Games> = Vec::new();
 
     pub fn try_times_on_average() -> f64 {
         let mut a: f64 = 0.0;
@@ -198,4 +203,5 @@ pub mod overall_variables {
 
     }
 
+    
 }

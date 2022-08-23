@@ -4,11 +4,12 @@ use crate::my_tool::tool;
 pub mod run_test_model {
 
     use super::tool::{match_words, Color, valid, args_parse};
-    use crate::{builtin_words, my_tool::tool::match_number, overall_situation::overall_variables::{is_day, is_seed, round, if_conflict, need_parse, record_random, record_word, record_dif, record_stats}};
+    use crate::{builtin_words, my_tool::tool::match_number, overall_situation::overall_variables::{is_day, is_seed, round, if_conflict, need_parse, record_random, record_word, record_dif, record_stats, final_set}};
     use rand::{Rng, SeedableRng};
     use rand::rngs::StdRng;
     use rand::seq::SliceRandom;
     use crate::overall_situation::overall_variables;
+    use crate::parse_json::process_json;
 
     pub fn test_run() -> (bool, bool, bool) {
 
@@ -18,6 +19,8 @@ pub mod run_test_model {
         let mut is_random: bool = false;
         let mut is_difficult: bool = false;
         let mut is_stats: bool = false;
+        let mut all_guess: Vec<String> = Vec::new();
+
         unsafe {
             if need_parse == true {
                 (is_word, is_random, is_difficult, is_stats) = args_parse();
@@ -39,6 +42,12 @@ pub mod run_test_model {
                 panic!("Conflicted Arguments!");
             }
         } // -d -s
+
+        unsafe {
+            if overall_variables::if_state == true {
+                process_json::test_load_json(overall_variables::json_address.clone());
+            }
+        }
 
         let mut guess_right: bool = true;
         let mut answer: String = String::new();
@@ -179,6 +188,8 @@ pub mod run_test_model {
 
             overall_variables::record_use_times(guess.clone());
 
+            all_guess.push(guess.clone().to_uppercase());
+
             let mut colors: Vec<Color> = vec![Color::Unknown; 5];//the color of XXXXX
 
             let mut cnt_gus: Vec<i32> = vec![0; 26];
@@ -276,10 +287,25 @@ pub mod run_test_model {
         }
 
         if guess_right == false {
-            unsafe { overall_variables::fail_num += 1; }
+            unsafe {
+                overall_variables::fail_num += 1;
+                overall_variables::TotalNum += 1;
+            }
             println!("FAILED {}", answer.to_uppercase());
         } else {
-            unsafe { overall_variables::success_num += 1; }
+            unsafe {
+                overall_variables::success_num += 1;
+                overall_variables::TotalNum += 1; 
+            }
+        }
+
+        unsafe {
+            overall_variables::GamesRecord.push(
+                crate::parse_json::process_json::Games {
+                    answer: answer.clone().to_uppercase(),
+                    guesses: all_guess.clone()
+                }
+            );
         }
 
         let mut word: bool = false;

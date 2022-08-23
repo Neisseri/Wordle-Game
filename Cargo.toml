@@ -7,10 +7,12 @@ edition = "2021"
 
 [dependencies]
 atty = "0.2"
-serde_json = "1.0"
 console = "0.15"
 text_io = "0.1.10"
 rand = "0.8.5"
+serde = "1.0.117"
+serde_derive = "1.0.117"
+serde_json = "1.0.59"
 
 [dev-dependencies]
 lazy_static = "1.0"

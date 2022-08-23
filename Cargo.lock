@@ -258,6 +258,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "53e8e5d5b70924f74ff5c6d64d9a5acd91422117c60f48c4e07855238a254553"
 
 [[package]]
+name = "serde_derive"
+version = "1.0.144"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94ed3a816fb1d101812f83e789f888322c34e291f894f19590dc310963e87a00"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "serde_json"
 version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -375,6 +386,8 @@ dependencies = [
  "ntest",
  "pretty_assertions",
  "rand",
+ "serde",
+ "serde_derive",
  "serde_json",
  "text_io",
 ]
