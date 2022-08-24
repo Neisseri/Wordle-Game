@@ -3,6 +3,7 @@ pub mod overall_variables {
     use crate::{builtin_words, parse_json};
     use std::fs::File;
     use std::io::{BufRead, BufReader};
+    use crate::my_tool::tool::DifficultRecord;
 
     pub static mut SUCCESS_NUM: i32 = 0; // the win times
     pub static mut FAIL_NUM: i32 = 0; // the fail times
@@ -32,6 +33,10 @@ pub mod overall_variables {
     pub static mut CONFIG_ADDRESS: String = String::new();
 
     pub static mut CONFIG_DEF: [bool; 9] = [false; 9];
+
+    // the senior functions
+    pub static mut NEED_TIP: bool = false;
+    pub static mut TIP_RECORD: Vec<Vec<DifficultRecord>> = Vec::new();
 
     pub fn try_times_on_average() -> f64 {
         let mut a: f64 = 0.0;

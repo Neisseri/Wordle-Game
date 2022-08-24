@@ -15,6 +15,14 @@ pub mod game_circle {
         let mut fail_num: i32;
         (_word, _random, stats) = run_interact_model::interact_run();
 
+        // json
+        unsafe {
+            if IF_STATE == true {
+                parse_json::process_json::before_load_json(
+                    overall_variables::JSON_ADDRESS.clone());
+            }
+        }
+
         if stats == true {
             unsafe {
                 suc_num = overall_variables::SUCCESS_NUM;
@@ -32,13 +40,17 @@ pub mod game_circle {
                 console::style(overall_variables::try_times_on_average())
                 .bold().blink().blue()
             );
-            println!("The words that you use most frequently are:");
+            println!("{}", 
+                console::style("The words that you use most frequently are:")
+                .blink().yellow());
             overall_variables::print_frequent();
         }
 
         if _word == false {
             loop {
-                println!("Do you want to start another game? Y/N");
+                println!("{}",
+                    console::style("Do you want to start another game? Y/N")
+                    .blink().on_red());
                 let s: String = read!();
                 if s == "Y" || s == "y" {
                     (_word, _random, stats) = run_interact_model::interact_run();
@@ -65,6 +77,13 @@ pub mod game_circle {
                     println!("The words that you use most frequently are:");
                     overall_variables::print_frequent();
                 }
+            }
+        }
+
+        unsafe {
+            if IF_STATE == true {
+                parse_json::process_json::load_json(
+                    overall_variables::JSON_ADDRESS.clone());
             }
         }
 

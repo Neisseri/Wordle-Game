@@ -16,6 +16,7 @@ pub mod run_interact_model {
                 RECORD_DIF, RECORD_STATS, CONFIG_ADDRESS
             }, config};
         use crate::parse_json::process_json;
+        use crate::possible_words::pos_word;
 
         let mut is_word: Option<String>;
         let mut is_random: bool;
@@ -24,6 +25,9 @@ pub mod run_interact_model {
         let mut all_guess_str: Vec<String> = Vec::new();
         
         unsafe {
+
+            overall_variables::TIP_RECORD.clear();
+
             if NEED_PARSE == true { // the first circle, so we need to parse arguments
                 (is_word, is_random, is_difficult, is_stats) = args_parse();
                 
@@ -55,6 +59,16 @@ pub mod run_interact_model {
                 is_difficult = RECORD_DIF;
                 is_stats = RECORD_STATS;
             }
+        }
+
+        if is_random == true {
+            println!("This is the {}!",
+                console::style("Random Model").blink().green());
+        }
+
+        if is_difficult == true {
+            println!("This is the {}!",
+                console::style("Difficult Model").blink().green());
         }
 
         unsafe {
@@ -194,14 +208,38 @@ pub mod run_interact_model {
         let mut all_guess: Vec<Vec<char>> = Vec::new();
 
         let mut dif_rec: Vec<DifficultRecord> = Vec::new();
+
+        // the clone Triat is not convenient, so use another vector
+        // to cover the data for `TIP_RECORD`
         
         for number in 1 ..= 6 {
 
+            let mut dif_rec2: Vec<DifficultRecord> = Vec::new();
+
+            println!("");
             println!("This is round {}:", number);
+
+            unsafe {
+                if overall_variables::NEED_TIP == true {
+                    if number == 1 {
+                        println!("{}", 
+                            console::style("All words are possible!")
+                            .blink().yellow());
+                    } else {
+                        println!("{}", 
+                            console::style("All the possible words are:")
+                            .blink().yellow());
+                        pos_word::print_ps_words();
+                    }
+                }
+            }
 
             guess_right = true;
 
             guess.clear();
+            println!("{}", 
+                console::style("Please guess the word!")
+                .blink().color256(50));
             std::io::stdin().read_line(&mut guess).expect("INPUT ERROR");
             guess.pop();
             
@@ -261,6 +299,7 @@ pub mod run_interact_model {
             // the number of letters in the guessed word
 
             dif_rec.clear();
+            dif_rec2.clear();
 
             for i in 0 ..= 4 {
                 if gus[i] == ans[i] {
@@ -292,6 +331,10 @@ pub mod run_interact_model {
                     letter: match_words(gus[i]) as i32,
                     color: colors[i].clone()
                 });
+                dif_rec2.push(DifficultRecord{
+                    letter: match_words(gus[i]) as i32,
+                    color: colors[i].clone()
+                });
 
                 if colors[i] == Color::Red {
                     if keyboard[match_words(gus[i])] == Color::Unknown {
@@ -319,6 +362,10 @@ pub mod run_interact_model {
                 }
 
             } //process the word
+
+            unsafe {
+                overall_variables::TIP_RECORD.push(dif_rec2);
+            }
 
             all_colors.push(colors.clone());
             all_keybd.push(keyboard.clone());
