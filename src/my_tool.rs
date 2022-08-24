@@ -1,5 +1,5 @@
 pub mod tool {
-    use crate::overall_situation::overall_variables::{is_day, is_seed, if_conflict, if_final_set, if_acceptable_set, self, final_set, acceptable_set, if_state, json_address};
+    use crate::overall_situation::overall_variables::{is_day, is_seed, if_conflict, if_final_set, if_acceptable_set, self, final_set, acceptable_set, if_state, json_address, IsConfig, ConfigAddress};
 
     pub fn match_words(letter: char) -> usize {
         match letter {
@@ -49,8 +49,16 @@ pub mod tool {
                 }
             }
 
-            let find = builtin_words::ACCEPTABLE.iter()
-            .position(|&r| r == guess.as_str());
+            let mut find: Option<usize> = None;
+            unsafe {
+                if if_acceptable_set.is_some() == true {
+                    find = overall_variables::acceptable_set.iter().position(|r| r == guess.as_str())
+                } else {
+                    find = builtin_words::ACCEPTABLE.iter()
+                .position(|&r| r == guess.as_str());
+                }
+            }
+            
             if find.is_none() == true {
                 return false
             }
@@ -118,6 +126,7 @@ pub mod tool {
         let mut get_final: bool = false;
         let mut get_acceptable: bool = false;
         let mut get_state: bool = false;
+        let mut get_config: bool = false;
 
         for arg in std::env::args() {
 
@@ -171,16 +180,37 @@ pub mod tool {
                 continue;
             }
 
+            if get_config == true {
+                unsafe {
+                    ConfigAddress = arg.clone();
+                }
+                get_config = false;
+                continue;
+            }
+
             match arg.as_str() {
-                "-w" | "--word" =>  get_word = true,
-                "-r" | "--random" => random = true,
-                "-D" | "--difficult" => difficult = true,
-                "-t" | "--stats" => stats = true,
-                "-d" | "--day" => unsafe { is_day = Some(1); get_day = true; },
-                "-s" | "--seed" => unsafe { is_seed = Some(100); get_seed = true; },
-                "-f" | "--final-set" => get_final = true,
-                "-a" | "--acceptable-set" => get_acceptable = true,
-                "-S" | "--state" => unsafe { if_state = true; get_state = true },
+                "-w" | "--word" => { get_word = true;
+                    unsafe { overall_variables::config_def[8] = true; } },
+                "-r" | "--random" => { random = true;
+                    unsafe { overall_variables::config_def[0] = true; } },
+                "-D" | "--difficult" =>  { difficult = true;
+                    unsafe { overall_variables::config_def[1] = true; } },
+                "-t" | "--stats" => { stats = true;
+                    unsafe { overall_variables::config_def[2] = true; } },
+                "-d" | "--day" => unsafe { is_day = Some(1);
+                    get_day = true;
+                    overall_variables::config_def[3] = true; },
+                "-s" | "--seed" => unsafe { is_seed = Some(100);
+                    get_seed = true;
+                    overall_variables::config_def[4] = true; },
+                "-f" | "--final-set" => { get_final = true;
+                    unsafe { overall_variables::config_def[5] = true; } },
+                "-a" | "--acceptable-set" => { get_acceptable = true;
+                    unsafe { overall_variables::config_def[6] = true; } },
+                "-S" | "--state" => unsafe { if_state = true;
+                    get_state = true;
+                    overall_variables::config_def[7] = true; },
+                "-c" | "--config" => unsafe { IsConfig = true; get_config = true },
                 _ => ()
             }
         }

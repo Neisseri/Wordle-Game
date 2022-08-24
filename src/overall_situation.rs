@@ -29,6 +29,11 @@ pub mod overall_variables {
     pub static mut json_address: String = String::new();
     pub static mut GamesRecord: Vec<parse_json::process_json::Games> = Vec::new();
 
+    pub static mut IsConfig: bool = false;
+    pub static mut ConfigAddress: String = String::new();
+
+    pub static mut config_def: [bool; 9] = [false; 9];
+
     pub fn try_times_on_average() -> f64 {
         let mut a: f64 = 0.0;
         let mut b: f64 = 0.0;
@@ -172,12 +177,14 @@ pub mod overall_variables {
             if if_final_set.is_none() == true {
                 2315
             } else {
-                1 // NOT COMPLETED!!!!!!!!!!!!!!!!!!!!!!!!!
+                final_set.len()
             }
         }
     }
 
     pub fn read_acceptable_set(address: String) {
+
+        unsafe { acceptable_set.clear(); }
 
         let file = File::open(address).unwrap();
         let reader = BufReader::new(file);
@@ -192,6 +199,8 @@ pub mod overall_variables {
 
     pub fn read_final_set(address: String) {
 
+        unsafe { final_set.clear(); }
+
         let file = File::open(address).unwrap();
         let reader = BufReader::new(file);
 
@@ -200,7 +209,8 @@ pub mod overall_variables {
             //println!("Final: {}", line);
             unsafe { final_set.push(line); }
         }
-
+        unsafe { final_set.sort(); }
+        //unsafe { println!("{:?}", final_set); }
     }
 
     

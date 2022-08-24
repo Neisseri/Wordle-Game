@@ -12,6 +12,7 @@ mod my_tool;
 mod circle_argument;
 mod overall_situation;
 mod parse_json;
+mod config;
 
 /// The main function for the Wordle game, implement your own logic here
 fn main() -> Result<(), Box<dyn std::error::Error>> {

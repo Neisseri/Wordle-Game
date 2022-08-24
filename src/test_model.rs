@@ -4,7 +4,7 @@ use crate::my_tool::tool;
 pub mod run_test_model {
 
     use super::tool::{match_words, Color, valid, args_parse};
-    use crate::{builtin_words, my_tool::tool::match_number, overall_situation::overall_variables::{is_day, is_seed, round, if_conflict, need_parse, record_random, record_word, record_dif, record_stats, final_set}};
+    use crate::{builtin_words, my_tool::tool::match_number, overall_situation::overall_variables::{is_day, is_seed, round, if_conflict, need_parse, record_random, record_word, record_dif, record_stats, final_set, ConfigAddress}, config};
     use rand::{Rng, SeedableRng};
     use rand::rngs::StdRng;
     use rand::seq::SliceRandom;
@@ -14,6 +14,7 @@ pub mod run_test_model {
     pub fn test_run() -> (bool, bool, bool) {
 
         use crate::my_tool::tool::{ difficult_record, difficult_valid };
+        use crate::config::Configuration;
 
         let mut is_word: Option<String> = None;
         let mut is_random: bool = false;
@@ -22,14 +23,31 @@ pub mod run_test_model {
         let mut all_guess: Vec<String> = Vec::new();
 
         unsafe {
-            if need_parse == true {
+            if need_parse == true { // the first circle, so we need to parse arguments
                 (is_word, is_random, is_difficult, is_stats) = args_parse();
+                
+                if overall_variables::IsConfig == true {
+                    let mut tmp_word: Option<String> = None;
+                    let mut tmp_random: bool = false;
+                    let mut tmp_difficult: bool = false;
+                    let mut tmp_stats: bool = false;
+                    (tmp_word, tmp_random, tmp_difficult, tmp_stats) = 
+                        config::Configuration::parse_config(
+                            ConfigAddress.clone());
+                    if is_word.is_none() == true && tmp_word.is_some() == true {
+                        is_word = tmp_word;
+                    }
+                    if tmp_random == true { is_random = true; }
+                    if tmp_difficult == true { is_difficult = true; }
+                    if tmp_stats == true { is_stats = true; }
+                }
+
                 record_word = is_word.clone();
                 record_random = is_random;
                 record_dif = is_difficult;
                 record_stats = is_stats;
                 need_parse = false;
-            } else {
+            } else { // we have parsed the arguments
                 is_word = record_word.clone();
                 is_random = record_random;
                 is_difficult = record_dif;
@@ -44,6 +62,17 @@ pub mod run_test_model {
         } // -d -s
 
         unsafe {
+
+            /*if overall_variables::if_acceptable_set.is_some() == true {
+                let s: String = (overall_variables::if_acceptable_set.clone()).unwrap();
+                overall_variables::read_acceptable_set(s.clone());
+            }
+
+            if overall_variables::if_final_set.is_some() == true {
+                let s: String = (overall_variables::if_final_set.clone()).unwrap();
+                overall_variables::read_final_set(s.clone());
+            }*/
+
             if overall_variables::if_state == true {
                 process_json::test_load_json(overall_variables::json_address.clone());
             }
@@ -96,25 +125,46 @@ pub mod run_test_model {
 
             } else { // have seed
                 
-                let mut rand_seed: u64 = seed.unwrap();
-                let mut rng = rand::rngs::StdRng::seed_from_u64(rand_seed);
-                let mut y = [0_usize; 2315];
-                for i in 0_usize ..= 2314_usize {
-                    y[i] = i;
-                }
-                y.shuffle(& mut rng);
-                let mut index = 0;
                 unsafe {
-                    round += 1;
-                    if is_day.is_none() == true {
-                        index = round - 1;
-                    } else {
-                        let mut skip = is_day.unwrap();
-                        index = round - 1 + skip - 1;
+                    if overall_variables::if_final_set == None {
+                        let mut rand_seed: u64 = seed.unwrap();
+                        let mut rng = rand::rngs::StdRng::seed_from_u64(rand_seed);
+                        let mut y = [0_usize; 2315];
+                        for i in 0_usize ..= 2314_usize {
+                            y[i] = i;
+                        }
+                        y.shuffle(& mut rng);
+                        let mut index = 0;
+                        round += 1;
+                        if is_day.is_none() == true {
+                            index = round - 1;
+                        } else {
+                            let mut skip = is_day.unwrap();
+                            index = round - 1 + skip - 1;
+                        }
+                        answer = builtin_words::FINAL[y[index as usize]].to_string();
+                    } else { // FINAL is read from file
+                        let l = overall_variables::final_len();
+                        //if l == 0 { println!("!!!!!!!!!!!!"); }
+                        let mut y: Vec<usize> = Vec::new();
+                        let mut rand_seed: u64 = seed.unwrap();
+                        for i in 0 ..= l - 1 {
+                            y.push(i);
+                        }
+                        y.shuffle(&mut rand::rngs::StdRng::seed_from_u64(rand_seed));
+                        let mut index = 0;
+                        round += 1;
+                        if is_day.is_none() == true {
+                            index = round - 1;
+                        } else {
+                            let mut skip = is_day.unwrap();
+                            index = round - 1 + skip - 1;
+                        }
+                        answer = builtin_words::FINAL[y[index as usize]].to_string();
+                        //println!("The answer is {}", answer);
+                        //println!("The index is {}", y[index as usize]);
                     }
                 }
-                answer = builtin_words::FINAL[y[index as usize]].to_string();
-                //println!("The Answer is: {} {}", index, answer);
 
             } // --seed
 
