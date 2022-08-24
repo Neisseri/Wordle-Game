@@ -3,8 +3,8 @@ pub mod process_json {
     use serde_derive::{ Serialize, Deserialize };
     use crate::overall_situation::overall_variables;
 
-    pub static mut before_win: i32 = 0;
-    pub static mut before_lose: i32 = 0;
+    pub static mut BEFORE_WIN: i32 = 0;
+    pub static mut BEFORE_LOSE: i32 = 0;
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct Games {
@@ -20,7 +20,7 @@ pub mod process_json {
 
     pub fn before_load_json(address: String) {
 
-        let mut json_record = {
+        let json_record = {
             let json_record = std::fs::read_to_string(&address);
     
             // Load the State structure from the string.
@@ -37,20 +37,20 @@ pub mod process_json {
 
         unsafe {
             for i in 0 ..= json_record.total_rounds - 1 {
-                let mut game: &Games = &json_record.games[i as usize];
-                let mut l: usize = game.guesses.len();
+                let game: &Games = &json_record.games[i as usize];
+                let l: usize = game.guesses.len();
                 if game.answer == game.guesses[l - 1] {
-                    before_win += 1;
-                    overall_variables::try_times.push(l as i32);
+                    BEFORE_WIN += 1;
+                    overall_variables::TRY_TIMES.push(l as i32);
                 } else {
-                    before_lose += 1;
+                    BEFORE_LOSE += 1;
                 }
                 for j in 0 ..= l - 1 {
                     overall_variables::record_use_times(game.guesses[j].clone().to_lowercase());
                 }
             }
-            overall_variables::success_num += before_win;
-            overall_variables::fail_num += before_lose;
+            overall_variables::SUCCESS_NUM += BEFORE_WIN;
+            overall_variables::FAIL_NUM += BEFORE_LOSE;
         }
     }
 
@@ -77,13 +77,13 @@ pub mod process_json {
         };
  
         unsafe {
-            json_record.total_rounds = overall_variables::success_num
-                + overall_variables::fail_num;
-            for i in 0 ..= overall_variables::GamesRecord.len() - 1 {
+            json_record.total_rounds = overall_variables::SUCCESS_NUM
+                + overall_variables::FAIL_NUM;
+            for i in 0 ..= overall_variables::GAMES_RECORD.len() - 1 {
                 json_record.games.push(
                     Games {
-                        answer: overall_variables::GamesRecord[i].answer.clone(),
-                        guesses: overall_variables::GamesRecord[i].guesses.clone() 
+                        answer: overall_variables::GAMES_RECORD[i].answer.clone(),
+                        guesses: overall_variables::GAMES_RECORD[i].guesses.clone() 
                     }
                 )
             } // modify the json file
@@ -92,7 +92,7 @@ pub mod process_json {
         std::fs::write(
             &address,
             serde_json::to_string_pretty(&json_record).unwrap(),
-        ); // write in the json file
+        ).expect("WRITE IN ERROR!"); // write in the json file
 
     }
 

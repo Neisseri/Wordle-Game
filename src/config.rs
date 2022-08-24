@@ -1,7 +1,7 @@
-pub mod Configuration {
+pub mod configuration {
 
     use serde_derive::{ Serialize, Deserialize };
-    use crate::{overall_situation::overall_variables, my_tool::tool::difficult_record};
+    use crate::overall_situation::overall_variables;
 
     #[derive(Serialize, Deserialize)]
     pub struct CFG {
@@ -23,7 +23,7 @@ pub mod Configuration {
         let mut difficult: bool = false;
         let mut stats: bool = false;
 
-        let mut json_record = {
+        let json_record = {
             let json_record = std::fs::read_to_string(&address);
     
             // Load the CFG structure from the string.
@@ -33,44 +33,44 @@ pub mod Configuration {
 
         unsafe {
             if json_record.day.is_some() == true 
-                && overall_variables::config_def[3] == false {
-                overall_variables::is_day = json_record.day.clone();
+                && overall_variables::CONFIG_DEF[3] == false {
+                overall_variables::IS_DAY = json_record.day.clone();
             }
             if json_record.seed.is_some() == true 
-                && overall_variables::config_def[4] == false {
-                overall_variables::is_seed = json_record.seed.clone();
+                && overall_variables::CONFIG_DEF[4] == false {
+                overall_variables::IS_SEED = json_record.seed.clone();
             }
             if json_record.final_set.is_some() == true
-                && overall_variables::config_def[5] == false {
-                overall_variables::if_final_set = json_record.final_set.clone();
+                && overall_variables::CONFIG_DEF[5] == false {
+                overall_variables::IF_FINAL_SET = json_record.final_set.clone();
                 overall_variables::read_final_set(
-                    overall_variables::if_final_set.clone().unwrap());
+                    overall_variables::IF_FINAL_SET.clone().unwrap());
             }
             if json_record.acceptable_set.is_some() == true 
-                && overall_variables::config_def[6] == false {
-                overall_variables::if_acceptable_set = json_record.acceptable_set.clone();
+                && overall_variables::CONFIG_DEF[6] == false {
+                overall_variables::IF_ACCEPTABLE_SET = json_record.acceptable_set.clone();
                 overall_variables::read_acceptable_set(
-                    overall_variables::if_acceptable_set.clone().unwrap());
+                    overall_variables::IF_ACCEPTABLE_SET.clone().unwrap());
             }
             if json_record.state.is_some() == true 
-                && overall_variables::config_def[7] == false {
-                overall_variables::if_state = true;
-                overall_variables::json_address = json_record.state.unwrap();
+                && overall_variables::CONFIG_DEF[7] == false {
+                overall_variables::IF_STATE = true;
+                overall_variables::JSON_ADDRESS = json_record.state.unwrap();
             }
             if json_record.word.is_some() == true 
-                && overall_variables::config_def[8] == false {
+                && overall_variables::CONFIG_DEF[8] == false {
                 word = json_record.word.clone();
             }
             if json_record.random.is_some() == true
-                && overall_variables::config_def[0] == false {
+                && overall_variables::CONFIG_DEF[0] == false {
                 random = json_record.random.unwrap();
             }
             if json_record.difficult.is_some() == true 
-                && overall_variables::config_def[1] == false {
+                && overall_variables::CONFIG_DEF[1] == false {
                 difficult = json_record.difficult.unwrap();
             }
             if json_record.stats.is_some() == true 
-                && overall_variables::config_def[2] == false {
+                && overall_variables::CONFIG_DEF[2] == false {
                 stats = json_record.stats.unwrap();
             }
         }

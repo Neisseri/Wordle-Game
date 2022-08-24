@@ -1,5 +1,9 @@
 pub mod tool {
-    use crate::overall_situation::overall_variables::{is_day, is_seed, if_conflict, if_final_set, if_acceptable_set, self, final_set, acceptable_set, if_state, json_address, IsConfig, ConfigAddress};
+    use crate::overall_situation::overall_variables::
+    {IS_DAY, IS_SEED, IF_CONFLICT, IF_FINAL_SET,
+        IF_ACCEPTABLE_SET, self, FINAL_SET, ACCEPTABLE_SET,
+        IF_STATE, JSON_ADDRESS, IS_CONFIG, CONFIG_ADDRESS
+    };
 
     pub fn match_words(letter: char) -> usize {
         match letter {
@@ -22,7 +26,6 @@ pub mod tool {
             20 => 'U', 21 => 'V', 22 => 'W', 23 => 'X', 24 => 'Y',
             25 => 'Z', _ => {
                 panic!("Impossible!");
-                '!'
             } 
         }
     }
@@ -49,10 +52,10 @@ pub mod tool {
                 }
             }
 
-            let mut find: Option<usize> = None;
+            let find: Option<usize>;
             unsafe {
-                if if_acceptable_set.is_some() == true {
-                    find = overall_variables::acceptable_set.iter().position(|r| r == guess.as_str())
+                if IF_ACCEPTABLE_SET.is_some() == true {
+                    find = overall_variables::ACCEPTABLE_SET.iter().position(|r| r == guess.as_str())
                 } else {
                     find = builtin_words::ACCEPTABLE.iter()
                 .position(|&r| r == guess.as_str());
@@ -70,14 +73,14 @@ pub mod tool {
         true
     }
 
-    pub struct difficult_record {
+    pub struct DifficultRecord {
         pub letter: i32,
         pub color: Color
     }
 
     pub fn difficult_valid(
         gus: &Vec<char>,
-        dif_rec: &Vec<difficult_record>
+        dif_rec: &Vec<DifficultRecord>
     ) -> bool {
         let mut is_valid: bool = true;
 
@@ -139,7 +142,7 @@ pub mod tool {
             if get_day == true {
                 let days: Option<i32> = if_number(arg.clone());
                 if days.is_some() == true {
-                    unsafe { is_day = days; }
+                    unsafe { IS_DAY = days; }
                 }
                 get_day = false;
                 continue;
@@ -148,7 +151,7 @@ pub mod tool {
             if get_seed == true {
                 let seed: Option<u64> = if_number_u64(arg.clone());
                 if seed.is_some() == true {
-                    unsafe { is_seed = seed; }
+                    unsafe { IS_SEED = seed; }
                 }
                 get_seed = false;
                 continue;
@@ -156,7 +159,7 @@ pub mod tool {
 
             if get_final == true {
                 unsafe {
-                    if_final_set = Some(arg.clone());
+                    IF_FINAL_SET = Some(arg.clone());
                     overall_variables::read_final_set(arg.clone());
                 }
                 get_final = false;
@@ -165,7 +168,7 @@ pub mod tool {
 
             if get_acceptable == true {
                 unsafe { 
-                    if_acceptable_set = Some(arg.clone()); 
+                    IF_ACCEPTABLE_SET = Some(arg.clone()); 
                     overall_variables::read_acceptable_set(arg.clone());
                 }
                 get_acceptable = false;
@@ -174,7 +177,7 @@ pub mod tool {
 
             if get_state == true {
                 unsafe {
-                    json_address = arg.clone();
+                    JSON_ADDRESS = arg.clone();
                 }
                 get_state = false;
                 continue;
@@ -182,7 +185,7 @@ pub mod tool {
 
             if get_config == true {
                 unsafe {
-                    ConfigAddress = arg.clone();
+                    CONFIG_ADDRESS = arg.clone();
                 }
                 get_config = false;
                 continue;
@@ -190,51 +193,51 @@ pub mod tool {
 
             match arg.as_str() {
                 "-w" | "--word" => { get_word = true;
-                    unsafe { overall_variables::config_def[8] = true; } },
+                    unsafe { overall_variables::CONFIG_DEF[8] = true; } },
                 "-r" | "--random" => { random = true;
-                    unsafe { overall_variables::config_def[0] = true; } },
+                    unsafe { overall_variables::CONFIG_DEF[0] = true; } },
                 "-D" | "--difficult" =>  { difficult = true;
-                    unsafe { overall_variables::config_def[1] = true; } },
+                    unsafe { overall_variables::CONFIG_DEF[1] = true; } },
                 "-t" | "--stats" => { stats = true;
-                    unsafe { overall_variables::config_def[2] = true; } },
-                "-d" | "--day" => unsafe { is_day = Some(1);
+                    unsafe { overall_variables::CONFIG_DEF[2] = true; } },
+                "-d" | "--day" => unsafe { IS_DAY = Some(1);
                     get_day = true;
-                    overall_variables::config_def[3] = true; },
-                "-s" | "--seed" => unsafe { is_seed = Some(100);
+                    overall_variables::CONFIG_DEF[3] = true; },
+                "-s" | "--seed" => unsafe { IS_SEED = Some(100);
                     get_seed = true;
-                    overall_variables::config_def[4] = true; },
+                    overall_variables::CONFIG_DEF[4] = true; },
                 "-f" | "--final-set" => { get_final = true;
-                    unsafe { overall_variables::config_def[5] = true; } },
+                    unsafe { overall_variables::CONFIG_DEF[5] = true; } },
                 "-a" | "--acceptable-set" => { get_acceptable = true;
-                    unsafe { overall_variables::config_def[6] = true; } },
-                "-S" | "--state" => unsafe { if_state = true;
+                    unsafe { overall_variables::CONFIG_DEF[6] = true; } },
+                "-S" | "--state" => unsafe { IF_STATE = true;
                     get_state = true;
-                    overall_variables::config_def[7] = true; },
-                "-c" | "--config" => unsafe { IsConfig = true; get_config = true },
+                    overall_variables::CONFIG_DEF[7] = true; },
+                "-c" | "--config" => unsafe { IS_CONFIG = true; get_config = true },
                 _ => ()
             }
         }
 
         if random == true { // random model
             if word.is_some() == true {
-                unsafe { if_conflict = true; }
+                unsafe { IF_CONFLICT = true; }
             }
         } else { // set-answer model
             unsafe {
-                if is_day.is_some() == true {
-                    if_conflict = true;
+                if IS_DAY.is_some() == true {
+                    IF_CONFLICT = true;
                 }
-                if is_seed.is_some() == true { 
-                    if_conflict = true;
+                if IS_SEED.is_some() == true { 
+                    IF_CONFLICT = true;
                 }
             }
         }
 
         unsafe {
-            if if_acceptable_set.is_some() == true &&
-                if_final_set.is_some() == true {
+            if IF_ACCEPTABLE_SET.is_some() == true &&
+                IF_FINAL_SET.is_some() == true {
                     if word_set_check() == false {
-                        if_conflict = true;
+                        IF_CONFLICT = true;
                     }
                 }
         }
@@ -290,10 +293,10 @@ pub mod tool {
         let mut b: bool = true;
 
         unsafe {
-            for i in 0 ..= final_set.len() - 1 {
+            for i in 0 ..= FINAL_SET.len() - 1 {
                 let mut find: bool = false;
-                for j in 0 ..= acceptable_set.len() - 1 {
-                    if acceptable_set[j] == final_set[i] {
+                for j in 0 ..= ACCEPTABLE_SET.len() - 1 {
+                    if ACCEPTABLE_SET[j] == FINAL_SET[i] {
                         find = true;
                         break;
                     }
