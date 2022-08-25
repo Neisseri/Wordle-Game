@@ -135,7 +135,7 @@ pub mod run_test_model {
                         answer = builtin_words::FINAL[y[index as usize]].to_string();
                     } else { // FINAL is read from file
                         let l = overall_variables::final_len();
-                        //if l == 0 { println!("!!!!!!!!!!!!"); }
+    
                         let mut y: Vec<usize> = Vec::new();
                         let rand_seed: u64 = seed.unwrap();
                         for i in 0 ..= l - 1 {

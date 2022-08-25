@@ -1,40 +1,60 @@
 pub mod solver {
 
-    use crate::overall_situation::overall_variables::TIP_RECORD;
+    use crate::overall_situation::overall_variables::{TIP_RECORD, self};
     use crate::my_tool::tool::{DifficultRecord, match_words, Color};
-    use crate::builtin_words;
+    use crate::{builtin_words, test_solver};
 
     pub fn start_solver() {
 
-        println!("{}",
-            console::style("Welcome to use Wordle Solver!")
-            .blink().color256(150));
-        println!("You should determine a word of 5 letters.");
+        let if_c: bool;
+        unsafe { if_c = overall_variables::IF_CALCULATE; }
+
+        if if_c == false {
+            println!("{}",
+                console::style("Welcome to use Wordle Solver!")
+                .blink().color256(150));
+            println!("You should determine a word of 5 letters.");
+        }
+        
 
         let mut round: i32 = 0;
-        let mut my_guess: String = "world".to_string();
+        let mut my_guess: String;
+        unsafe {
+            my_guess = test_solver::average_times::FIRST_WORD.clone();
+        }
+        let mut not_this_place :Vec<Vec<bool>> = Vec::new();
+        for _ in 0 ..= 4 {
+            let v: Vec<bool> = vec![false; 26];
+            not_this_place.push(v);
+        } // record on place i the word j is not correct
+
+        // record the appear times to get the recommended words
 
         unsafe { TIP_RECORD.clear(); }
 
         loop {
             round += 1;
             let mut gus_record: Vec<DifficultRecord> = Vec::new();
-            println!("Round {}: My guess is {}", 
-                console::style(round).blink().blue(),
-                console::style(&my_guess).blink().green());
-            println!("Please give me the Colors (such as RRYGG)");
-            let colors: String =  text_io::read!();
-
+            let colors: String;
             let mut c: Vec<Color> = Vec::new();
-            for ch in colors.chars() {
-                let color: Color = match ch {
-                    'G' => Color::Green,
-                    'Y' => Color::Yellow,
-                    'R' => Color::Red,
-                    _ => Color::Unknown
-                };
-                c.push(color);
-            } // the color vector
+            if if_c == false {
+                println!("Round {}: My guess is {}", 
+                    console::style(round).blink().blue(),
+                    console::style(&my_guess).blink().green());
+                println!("Please give me the Colors (such as RRYGG)");
+                colors =  text_io::read!();
+                for ch in colors.chars() {
+                    let color: Color = match ch {
+                        'G' => Color::Green,
+                        'Y' => Color::Yellow,
+                        'R' => Color::Red,
+                        _ => Color::Unknown
+                    };
+                    c.push(color);
+                } // the color vector
+            } else {
+                c = crate::test_solver::average_times::get_color(&my_guess);
+            }
 
             let mut if_guessed: bool = true;
             for i in 0 ..= 4 {
@@ -43,11 +63,19 @@ pub mod solver {
                     break;
                 }
             }
-            if if_guessed == true {
-                println!("The answer is {}!", 
-                    console::style(&my_guess).blink().green());
-                break;
+            if if_c == false {
+                if if_guessed == true {
+                    println!("The answer is {}!", 
+                        console::style(&my_guess).blink().green());
+                    break;
+                }
+            } else {
+                if if_guessed == true {
+                    unsafe { test_solver::average_times::TIMES.push(round); }
+                    break;
+                }
             }
+            
 
             let mut letter: Vec<i32> = Vec::new();
             for l in my_guess.chars() {
@@ -79,12 +107,14 @@ pub mod solver {
 
                     for j in 0 ..= 4 {
                         let index = TIP_RECORD[i][j].letter;
+                        // the code of the letter on position j
 
                         if TIP_RECORD[i][j].color == Color::Green {
                                 limit[j] = TIP_RECORD[i][j].letter;
                                 tmp_num_g[index as usize] += 1;
                         } else if TIP_RECORD[i][j].color == Color::Yellow {
                                 tmp_num_y[index as usize] += 1;
+                                not_this_place[j][index as usize] = true;
                             } else { // the word is red
                                 tmp_num_r[index as usize] += 1;
                             }
@@ -123,6 +153,10 @@ pub mod solver {
                             b = false;
                             break;
                         }
+                    }
+                    if not_this_place[i][match_words(ch[i])] == true {
+                        b = false;
+                        break;
                     }
                 }
 

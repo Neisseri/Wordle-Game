@@ -1,7 +1,8 @@
 use circle_argument::game_circle::test_model_circle;
 use console;
 use std::io::{self, Write};
-use crate::circle_argument::game_circle::{ interact_model_circle };
+use crate::{circle_argument::game_circle::{ interact_model_circle }, overall_situation::overall_variables};
+use crate::test_solver::average_times::test_average_guess_times;
 
 mod test_model;
 mod builtin_words;
@@ -13,49 +14,63 @@ mod parse_json;
 mod config;
 mod possible_words;
 mod wordle_solver;
+mod test_solver;
 
 /// The main function for the Wordle game, implement your own logic here
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let is_tty = atty::is(atty::Stream::Stdout);
     //let is_tty: bool = false;
+    let mut if_c: bool = false;
 
     if is_tty {
-        
-        print!("{}", console::style("Your name: ").bold().red());
-        io::stdout().flush().unwrap();
 
-        let mut line = String::new();
-        io::stdin().read_line(&mut line)?;
-        println!("Welcome to wordle, {}!", 
-            console::style(line.trim()).blink().red());
-
-        /*print!("Command line arguments: ");
+        let mut if_world_solver: bool = false;
+        // start the wordle-solver, the argument is --solver
+        let mut if_need_tips: bool = false;
+        // give all the possible guesses, the argument is --possible
         for arg in std::env::args() {
-            print!("{} ", arg);
-        }
-        println!("");*/
-
-        println!("{}",
-            console::style("Do you want to start the WordleSolver? Y/N")
-            .blink().on_blue());
-        let if_solver: String = text_io::read!();
-        if if_solver == "Y" || if_solver == "y" {
-            wordle_solver::solver::start_solver();
-        } else {
-
-            println!("{}",
-            console::style("Do you need some tips? Y/N")
-            .blink().on_green());
-            let if_tip: String = text_io::read!();
-            if if_tip == "Y" || if_tip == "y" {
-                unsafe { overall_situation::
-                overall_variables::NEED_TIP = true; }
+            if arg == "--solver".to_string() {
+                if_world_solver = true;
             }
-
-            interact_model_circle();
-
+            if arg == "--possible".to_string() {
+                if_need_tips = true;
+            }
+            if arg == "--rec".to_string() {
+                unsafe { overall_variables::NEED_RECOMMEND = true; }
+            }
+            if arg == "--test".to_string() {
+                unsafe { overall_variables::IF_CALCULATE = true; }
+                if_c = true;
+            }
+            if arg == "--first" {
+                unsafe { test_solver::average_times::IF_FIRST = true; }
+            }
         }
+        
+        if if_c == false {
 
+            print!("{}", console::style("Your name: ").bold().red());
+            io::stdout().flush().unwrap();
+
+            let mut line = String::new();
+            io::stdin().read_line(&mut line)?;
+            println!("Welcome to wordle, {}!", 
+                console::style(line.trim()).blink().red());
+
+            if if_world_solver == true {
+                wordle_solver::solver::start_solver();
+            } else {
+                if if_need_tips == true {
+                    unsafe { overall_situation::
+                    overall_variables::NEED_TIP = true; }
+                }
+                interact_model_circle();
+            }
+        } else {
+            //println!("break 2");
+            test_average_guess_times();
+        }
+        
     } else {
         test_model_circle();
     }

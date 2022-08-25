@@ -38,6 +38,11 @@ pub mod overall_variables {
     pub static mut NEED_TIP: bool = false;
     pub static mut TIP_RECORD: Vec<Vec<DifficultRecord>> = Vec::new();
 
+    pub static mut NEED_RECOMMEND: bool = false;
+    // give five recommended words, the argument is --rec
+
+    pub static mut IF_CALCULATE: bool = false;
+
     pub fn try_times_on_average() -> f64 {
         let mut a: f64 = 0.0;
         let mut b: f64 = 0.0;
