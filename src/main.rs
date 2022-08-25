@@ -32,17 +32,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             if arg == "--solver".to_string() {
                 if_world_solver = true;
             }
-            if arg == "--possible".to_string() {
+            if arg == "--possible".to_string() { // give all the possible words
                 if_need_tips = true;
             }
-            if arg == "--rec".to_string() {
+            if arg == "--rec".to_string() { // give the recommended words
                 unsafe { overall_variables::NEED_RECOMMEND = true; }
             }
             if arg == "--test".to_string() {
                 unsafe { overall_variables::IF_CALCULATE = true; }
                 if_c = true;
             }
-            if arg == "--first" {
+            if arg == "--first" { // give the best start-words
                 unsafe { test_solver::average_times::IF_FIRST = true; }
             }
         }

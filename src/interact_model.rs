@@ -95,7 +95,7 @@ pub mod run_interact_model {
 
             if seed.is_none() == true { // no --seed argument
             
-                let mut rng = rand::thread_rng();
+                let rng = &mut rand::rngs::StdRng::seed_from_u64(10);
                 let mut index: usize = rng.gen_range(0 ..= 2314);
                 unsafe {
                     let mut if_repeat = overall_variables::WORD_HISTORY.iter().position(|r| r == &index);

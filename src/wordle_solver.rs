@@ -1,7 +1,7 @@
 pub mod solver {
 
-    use crate::overall_situation::overall_variables::{TIP_RECORD, self};
-    use crate::my_tool::tool::{DifficultRecord, match_words, Color};
+    use crate::overall_situation::overall_variables::{TIP_RECORD, self, IF_CALCULATE};
+    use crate::my_tool::tool::{DifficultRecord, match_words, Color, modify};
     use crate::{builtin_words, test_solver};
 
     pub fn start_solver() {
@@ -15,12 +15,21 @@ pub mod solver {
                 .blink().color256(150));
             println!("You should determine a word of 5 letters.");
         }
+
+        let mut info_cmp: Vec<i32> = vec![1; 26];
+        // compare how many information we know about the word
+        // the less the better
         
 
         let mut round: i32 = 0;
+        let mut ro: i32 = 0;
         let mut my_guess: String;
         unsafe {
-            my_guess = test_solver::average_times::FIRST_WORD.clone();
+            if IF_CALCULATE == true {
+                my_guess = test_solver::average_times::FIRST_WORD.clone();
+            } else {
+                my_guess = "world".to_string();
+            }
         }
         let mut not_this_place :Vec<Vec<bool>> = Vec::new();
         for _ in 0 ..= 4 {
@@ -37,6 +46,7 @@ pub mod solver {
             let mut gus_record: Vec<DifficultRecord> = Vec::new();
             let colors: String;
             let mut c: Vec<Color> = Vec::new();
+            ro = modify(ro);
             if if_c == false {
                 println!("Round {}: My guess is {}", 
                     console::style(round).blink().blue(),
@@ -71,7 +81,7 @@ pub mod solver {
                 }
             } else {
                 if if_guessed == true {
-                    unsafe { test_solver::average_times::TIMES.push(round); }
+                    unsafe { test_solver::average_times::TIMES.push(ro); }
                     break;
                 }
             }
@@ -115,8 +125,12 @@ pub mod solver {
                         } else if TIP_RECORD[i][j].color == Color::Yellow {
                                 tmp_num_y[index as usize] += 1;
                                 not_this_place[j][index as usize] = true;
+
+                                info_cmp[index as usize] += 2;
                             } else { // the word is red
                                 tmp_num_r[index as usize] += 1;
+
+                                info_cmp[index as usize] += 5;
                             }
 
                     }
@@ -139,9 +153,11 @@ pub mod solver {
             }
 
             // next we check all the acceptable words
+            let mut least_info: i32 = -1;
             for i in 0 ..= builtin_words::ACCEPTABLE.len() - 1 {
 
                 let mut b: bool = true;
+                let mut info: i32 = 0;
                 let w = builtin_words::ACCEPTABLE[i].clone();
                 let mut ch: Vec<char> = Vec::new();
                 for chars in w.chars() {
@@ -177,6 +193,9 @@ pub mod solver {
                                 b = false;
                                 break;
                             }
+                            if num[i] < rec_num[i] {
+                                info += 3;
+                            }
                         }
 
                     }
@@ -184,8 +203,19 @@ pub mod solver {
 
                 // print the words
                 if b == true {
-                    my_guess = w.clone().to_string();
-                    break;
+                    for j in 0 ..= 4 {
+                        //println!("{}", ch[j]);
+                        info += info_cmp[match_words(ch[j])];
+                    }
+                    if least_info == -1 {
+                        my_guess = w.clone().to_string();
+                        least_info = info;
+                    } else {
+                        if info < least_info {
+                            my_guess =w.clone().to_string();
+                        }
+                    }
+                    break; // delete the break or not
                 }
             }
         }

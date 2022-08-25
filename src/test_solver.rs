@@ -65,6 +65,7 @@ pub mod average_times {
         let if_first: bool;
         unsafe { if_first = IF_FIRST; }
         let mut best_words: Vec<(String, f64)> = Vec::new();
+        let mut fail_num: i32 = 0;
 
         for first in 0 ..= FINAL.len() - 1 { // traverse the first word
 
@@ -79,9 +80,6 @@ pub mod average_times {
                 // as answer
     
                 let answer = FINAL[i].clone();
-                if if_first == false {
-                    print!("Now calculating the {} word: {},", i + 1, &answer);
-                } 
                 let mut ans: Vec<char> = Vec::new();
                 for chars in answer.chars() {
                     ans.push(chars);
@@ -91,8 +89,10 @@ pub mod average_times {
     
                 if if_first == false {
                     unsafe {
+                        print!("Now calculating the {} word: {},", i + 1, &answer);
                         println!("solver takes {} times to get the answer",
                             TIMES[TIMES.len() - 1]);
+                        if TIMES[TIMES.len() - 1] > 6 { fail_num += 1; }
                     }
                 }
             }
@@ -108,6 +108,7 @@ pub mod average_times {
             }
             if if_first == false {
                 println!("Each word takes {:.2} times to guess on average.", a / b);
+                println!("{} words are  failed to be guessed.", fail_num);
                 break;
             } else {
                 println!("guess {:.2} times on average.", a / b);

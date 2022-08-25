@@ -5,6 +5,8 @@ pub mod tool {
         IF_STATE, JSON_ADDRESS, IS_CONFIG, CONFIG_ADDRESS
     };
 
+    pub static mut PLUS: i32 = 0;
+
     pub fn match_words(letter: char) -> usize {
         match letter {
             'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4,
@@ -287,6 +289,19 @@ pub mod tool {
         } else {
             None
         }
+    }
+
+    pub fn modify(mut x: i32) -> i32 {
+        
+        unsafe {
+            if PLUS < 4 {
+                PLUS += 1;
+                x = x + 1;
+            } else {
+                PLUS = 0;
+            }
+        }
+        x
     }
 
     pub fn word_set_check() -> bool {
