@@ -119,13 +119,14 @@ pub mod pos_word {
                                     info += 3;
                                 }
                             }
-
                         }
                     }
 
                     // print the words
                     if b == true {
-                        print!("{} ", w);
+                        if overall_variables::NEED_TIP == true {
+                            print!("{} ", w);
+                        } 
                         print_num += 1;
                         for j in 0 ..= 4 {
                             info += info_cmp[match_words(ch[j])];
@@ -148,19 +149,21 @@ pub mod pos_word {
                     }
                 }
 
-                println!("");
-                println!("There are {} possibilities for the answer", 
-                    console::style(print_num).blink().blue());
-
-                    if overall_variables::NEED_RECOMMEND == true {
-                        println!("{}",
-                            console::style("The recommended words are:").blink().yellow());
-                        for i in 0 ..= best_words.len() - 1 {
-                            print!("{} ", 
-                                console::style(&best_words[i].1).blink().green());
-                        }
-                        println!("");
+                if overall_variables::NEED_TIP == true {
+                    println!("");
+                    println!("There are {} possibilities for the answer", 
+                        console::style(print_num).blink().blue());
+                }
+                
+                if overall_variables::NEED_RECOMMEND == true {
+                    println!("{}",
+                        console::style("The recommended words are:").blink().yellow());
+                    for i in 0 ..= best_words.len() - 1 {
+                        print!("{} ", 
+                            console::style(&best_words[i].1).blink().green());
                     }
+                    println!("");
+                }
 
             } else {
                 // read words from the built-in ACCEPTABLE
@@ -207,13 +210,14 @@ pub mod pos_word {
                                     info += 3;
                                 }
                             }
-
                         }
                     }
 
                     // print the words
                     if b == true {
-                        print!("{} ", w);
+                        if overall_variables::NEED_TIP == true {
+                            print!("{} ", w);
+                        } 
                         print_num += 1;
                         for j in 0 ..= 4 {
                             //println!("{}", ch[j]);
@@ -237,9 +241,11 @@ pub mod pos_word {
                     }
                 }
 
-                println!("");
-                println!("There are {} possibilities for the answer", 
-                    console::style(print_num).blink().blue());
+                if overall_variables::NEED_TIP == true {
+                    println!("");
+                    println!("There are {} possibilities for the answer", 
+                        console::style(print_num).blink().blue());
+                }
 
                 if overall_variables::NEED_RECOMMEND == true {
                     println!("{}",

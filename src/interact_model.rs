@@ -231,6 +231,10 @@ pub mod run_interact_model {
                             .blink().yellow());
                         pos_word::print_ps_words();
                     }
+                } else if overall_variables::NEED_RECOMMEND == true {
+                    if number > 1 {
+                        pos_word::print_ps_words();
+                    }
                 }
             }
 
@@ -290,8 +294,6 @@ pub mod run_interact_model {
             // so it need String type
 
             all_guess.push(gus.clone());
-
-            overall_variables::record_use_times(guess.clone());
 
             let mut colors: Vec<Color> = vec![Color::Unknown; 5];//the color of XXXXX
 
