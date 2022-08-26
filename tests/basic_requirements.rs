@@ -50,7 +50,7 @@ fn test_05_5_pts_specify_offset_and_seed() {
 }
 
 #[test]
-#[timeout(2000)]
+#[timeout(10000)]
 fn test_06_5_pts_specify_word_list() {
     // specify word list + offset + seed
     TestCase::read("06_01_specify_word_list").run_and_compare_result();
@@ -70,7 +70,7 @@ fn test_07_5_pts_save_game_state() {
 }
 
 #[test]
-#[timeout(2000)]
+#[timeout(10000)]
 fn test_08_5_pts_config_file() {
     // use config file to specify word list, offset and seed
     TestCase::read("08_01_config_file").run_and_compare_result();
